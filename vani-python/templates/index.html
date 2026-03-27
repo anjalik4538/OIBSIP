@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VANI — Python Voice Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="scanlines"></div>
+
+  <div class="container">
+    <header>
+      <div class="logo-wrap">
+        <div class="logo-badge">PY</div>
+        <div>
+          <div class="logo-title">VANI</div>
+          <div class="logo-sub">Python Voice Assistant</div>
+        </div>
+      </div>
+      <div class="server-status">
+        <span class="dot green"></span>
+        <span class="mono">Flask Server: ACTIVE</span>
+      </div>
+    </header>
+
+    <div class="main-grid">
+      <!-- Left: Mic Panel -->
+      <div class="panel mic-panel">
+        <div class="panel-label">VOICE INPUT</div>
+
+        <div class="orb-wrap" id="orbWrap">
+          <div class="orb-outer">
+            <div class="orb-mid">
+              <div class="orb-inner">
+                <button class="orb-btn" id="micBtn">
+                  <svg class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="9" y="2" width="6" height="12" rx="3"/>
+                    <path d="M5 10a7 7 0 0 0 14 0"/>
+                    <line x1="12" y1="19" x2="12" y2="22"/>
+                    <line x1="8" y1="22" x2="16" y2="22"/>
+                  </svg>
+                  <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+                    <rect x="6" y="6" width="12" height="12" rx="2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="wave-bars" id="waveBars">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <div class="status-row">
+          <div class="status-dot" id="statusDot"></div>
+          <div class="status-msg" id="statusMsg">Mic dabayein ya Space press karein</div>
+        </div>
+
+        <div class="kbd-hint mono">[ SPACE ] toggle</div>
+      </div>
+
+      <!-- Right: Chat Log -->
+      <div class="panel chat-panel">
+        <div class="panel-label">CONVERSATION LOG
+          <button class="clear-btn" id="clearBtn">✕ Clear</button>
+        </div>
+        <div class="chat-log" id="chatLog">
+          <div class="chat-welcome">
+            <div class="welcome-icon">🤖</div>
+            <p>VANI taiyaar hai! Boliye, main sun rahi hoon.</p>
+            <p class="mono small">Flask + gTTS + Claude AI</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal Input -->
+    <div class="terminal-row">
+      <span class="prompt mono">&gt;&gt;&gt;</span>
+      <input type="text" id="textInput" class="terminal-input mono" placeholder="Ya yahan type karein aur Enter dabayein..."/>
+      <button class="send-btn" id="sendBtn">↵ SEND</button>
+    </div>
+
+    <!-- Info Bar -->
+    <div class="info-bar">
+      <div class="info-item">
+        <span class="info-label">STT</span>
+        <span class="info-val">Web Speech API</span>
+      </div>
+      <div class="info-divider">|</div>
+      <div class="info-item">
+        <span class="info-label">AI</span>
+        <span class="info-val">Claude (Anthropic)</span>
+      </div>
+      <div class="info-divider">|</div>
+      <div class="info-item">
+        <span class="info-label">TTS</span>
+        <span class="info-val">Python gTTS</span>
+      </div>
+      <div class="info-divider">|</div>
+      <div class="info-item">
+        <span class="info-label">SERVER</span>
+        <span class="info-val">Python Flask</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

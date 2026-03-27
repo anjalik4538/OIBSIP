@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PassForge — Password Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0d0d0d;
+    --surface: #141414;
+    --raised:  #1c1c1c;
+    --border:  #2a2a2a;
+    --cyan:    #00e5ff;
+    --green:   #00ff88;
+    --yellow:  #ffe600;
+    --red:     #ff3d3d;
+    --text:    #f0f0f0;
+    --muted:   #555;
+    --dim:     #333;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 16px 64px;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,229,255,0.012) 2px,
+      rgba(0,229,255,0.012) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 44px;
+    animation: fadeDown 0.5s ease;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .header-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+
+  .header h1 {
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .header h1 .accent { color: var(--cyan); }
+
+  .header-sub {
+    margin-top: 8px;
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: 1px;
+  }
+
+  /* ===== MAIN CARD ===== */
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--cyan);
+    padding: 32px;
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== SECTION LABEL ===== */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ===== LENGTH SLIDER ===== */
+  .length-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .length-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--cyan);
+    min-width: 64px;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .slider-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--dim);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 0;
+    background: var(--cyan);
+    cursor: pointer;
+    box-shadow: 0 0 12px var(--cyan);
+    transition: transform 0.1s;
+  }
+
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  /* ===== TOGGLES ===== */
+  .toggles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .toggle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--raised);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .toggle-item:hover { border-color: var(--cyan); }
+  .toggle-item.on { border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.04); }
+
+  .toggle-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text);
+  }
+
+  .toggle-example {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .toggle-switch {
+    width: 36px; height: 20px;
+    background: var(--dim);
+    border-radius: 0;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 14px; height: 14px;
+    background: var(--muted);
+    transition: transform 0.2s, background 0.2s;
+  }
+
+  .toggle-item.on .toggle-switch { background: rgba(0,229,255,0.15); }
+  .toggle-item.on .toggle-switch::after {
+    transform: translateX(16px);
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+  }
+
+  /* ===== COUNT ===== */
+  .count-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .count-btn {
+    width: 36px; height: 36px;
+    background: var(--raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, background 0.15s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .count-btn:hover { border-color: var(--cyan); background: rgba(0,229,255,0.05); color: var(--cyan); }
+
+  .count-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--cyan);
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .count-desc {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ===== GENERATE BUTTON ===== */
+  .gen-btn {
+    width: 100%;
+    background: var(--cyan);
+    color: var(--bg);
+    border: none;
+    padding: 18px;
+    font-size: 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gen-btn:hover {
+    box-shadow: 0 0 30px rgba(0,229,255,0.4), 0 0 60px rgba(0,229,255,0.15);
+    transform: translateY(-1px);
+  }
+
+  .gen-btn:active { transform: translateY(0) scale(0.99); }
+
+  /* ===== ERROR ===== */
+  .error-box {
+    margin-top: 16px;
+    background: rgba(255,61,61,0.08);
+    border: 1px solid rgba(255,61,61,0.3);
+    border-left: 3px solid var(--red);
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--red);
+    display: none;
+  }
+
+  /* ===== RESULTS ===== */
+  .results-wrap {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    display: none;
+  }
+
+  .pwd-item {
+    background: var(--raised);
+    border: 1px solid var(--border);
+    padding: 16px;
+    animation: slideIn 0.25s ease both;
+    position: relative;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .pwd-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    color: var(--text);
+    word-break: break-all;
+    line-height: 1.6;
+    padding-right: 36px;
+  }
+
+  .pwd-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  .strength-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .strength-dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .strength-dot {
+    width: 8px; height: 8px;
+    background: var(--dim);
+  }
+
+  .strength-dot.lit {
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 12px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+  /* ===== COPY ALL ===== */
+  .copy-all-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 12px;
+    font-size: 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .copy-all-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.03); }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    margin-top: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 1px;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 480px) {
+    .header h1 { font-size: 44px; }
+    .card { padding: 24px 20px; }
+    .toggles-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">// Secure Password Tool</div>
+  <h1>Pass<span class="accent">Forge</span></h1>
+  <div class="header-sub">Cryptographically secure passwords • Python secrets module</div>
+</div>
+
+<div class="card">
+
+  <!-- LENGTH -->
+  <div class="section-label">Password Length</div>
+  <div class="length-row">
+    <div class="length-display" id="len-display">16</div>
+    <div class="slider-wrap">
+      <input type="range" id="length-slider" min="4" max="128" value="16"
+             oninput="document.getElementById('len-display').textContent=this.value">
+      <div class="slider-labels"><span>4</span><span>32</span><span>64</span><span>128</span></div>
+    </div>
+  </div>
+
+  <!-- TOGGLES -->
+  <div class="section-label">Character Types</div>
+  <div class="toggles-grid">
+    <div class="toggle-item on" id="tog-upper" onclick="toggle(this)">
+      <div>
+        <div class="toggle-label">Uppercase</div>
+        <div class="toggle-example">A B C … Z</div>
+      </div>
+      <div class="toggle-switch"></div>
+    </div>
+    <div class="toggle-item on" id="tog-lower" onclick="toggle(this)">
+      <div>
+        <div class="toggle-label">Lowercase</div>
+        <div class="toggle-example">a b c … z</div>
+      </div>
+      <div class="toggle-switch"></div>
+    </div>
+    <div class="toggle-item on" id="tog-digits" onclick="toggle(this)">
+      <div>
+        <div class="toggle-label">Numbers</div>
+        <div class="toggle-example">0 1 2 … 9</div>
+      </div>
+      <div class="toggle-switch"></div>
+    </div>
+    <div class="toggle-item on" id="tog-symbols" onclick="toggle(this)">
+      <div>
+        <div class="toggle-label">Symbols</div>
+        <div class="toggle-example">! @ # $ % ^</div>
+      </div>
+      <div class="toggle-switch"></div>
+    </div>
+    <div class="toggle-item" id="tog-noambig" onclick="toggle(this)" style="grid-column:span 2">
+      <div>
+        <div class="toggle-label">Exclude Ambiguous</div>
+        <div class="toggle-example">Remove: O 0 I l 1</div>
+      </div>
+      <div class="toggle-switch"></div>
+    </div>
+  </div>
+
+  <!-- COUNT -->
+  <div class="section-label">How Many?</div>
+  <div class="count-row">
+    <button class="count-btn" onclick="changeCount(-1)">−</button>
+    <div class="count-val" id="count-val">1</div>
+    <button class="count-btn" onclick="changeCount(1)">+</button>
+    <div class="count-desc">ek baar mein passwords generate karo</div>
+  </div>
+
+  <!-- GENERATE -->
+  <button class="gen-btn" onclick="generate()">⚡ Generate Karo</button>
+
+  <div class="error-box" id="error-box"></div>
+
+  <!-- RESULTS -->
+  <div class="results-wrap" id="results-wrap">
+    <div class="section-label" style="margin-top:8px">Generated Passwords</div>
+    <div id="pwd-list"></div>
+    <button class="copy-all-btn" id="copy-all-btn" onclick="copyAll()" style="display:none">⊞ Sab Copy Karo</button>
+  </div>
+
+</div>
+
+<div class="footer">// Uses Python secrets module — cryptographically secure //</div>
+
+<script>
+let count = 1;
+
+function toggle(el) {
+  el.classList.toggle('on');
+}
+
+function changeCount(delta) {
+  count = Math.max(1, Math.min(10, count + delta));
+  document.getElementById('count-val').textContent = count;
+}
+
+async function generate() {
+  const errBox  = document.getElementById('error-box');
+  const resWrap = document.getElementById('results-wrap');
+  errBox.style.display = 'none';
+
+  const payload = {
+    length:            parseInt(document.getElementById('length-slider').value),
+    uppercase:         document.getElementById('tog-upper').classList.contains('on'),
+    lowercase:         document.getElementById('tog-lower').classList.contains('on'),
+    digits:            document.getElementById('tog-digits').classList.contains('on'),
+    symbols:           document.getElementById('tog-symbols').classList.contains('on'),
+    exclude_ambiguous: document.getElementById('tog-noambig').classList.contains('on'),
+    count
+  };
+
+  try {
+    const res  = await fetch('/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      errBox.textContent = '⚠ ' + data.error;
+      errBox.style.display = 'block';
+      resWrap.style.display = 'none';
+      return;
+    }
+
+    renderResults(data.passwords);
+
+  } catch(e) {
+    errBox.textContent = '⚠ Server se connect nahi ho pa raha. App chalao.';
+    errBox.style.display = 'block';
+  }
+}
+
+function renderResults(passwords) {
+  const list    = document.getElementById('pwd-list');
+  const resWrap = document.getElementById('results-wrap');
+  const copyAll = document.getElementById('copy-all-btn');
+
+  list.innerHTML = '';
+  resWrap.style.display = 'flex';
+
+  const TOTAL_DOTS = 7;
+
+  passwords.forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 'pwd-item';
+    item.style.animationDelay = (i * 0.06) + 's';
+
+    const filledDots = Math.round((p.score / 7) * TOTAL_DOTS);
+    const dotsHtml = Array.from({length: TOTAL_DOTS}, (_, d) =>
+      `<div class="strength-dot${d < filledDots ? ' lit' : ''}" style="background:${d < filledDots ? p.color : ''};color:${p.color}"></div>`
+    ).join('');
+
+    item.innerHTML = `
+      <div class="pwd-text" id="pwd-${i}">${escHtml(p.password)}</div>
+      <div class="pwd-footer">
+        <div class="strength-badge" style="color:${p.color}">
+          <div class="strength-dots">${dotsHtml}</div>
+          ${p.strength}
+        </div>
+        <button class="copy-btn" id="cbtn-${i}" onclick="copyOne(${i}, '${escAttr(p.password)}')">Copy</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+
+  copyAll.style.display = passwords.length > 1 ? 'block' : 'none';
+  resWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyOne(index, pwd) {
+  navigator.clipboard.writeText(pwd).then(() => {
+    const btn = document.getElementById('cbtn-' + index);
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyAll() {
+  const items = document.querySelectorAll('.pwd-text');
+  const all   = Array.from(items).map(el => el.textContent).join('\n');
+  navigator.clipboard.writeText(all).then(() => {
+    const btn = document.getElementById('copy-all-btn');
+    btn.textContent = '✓ Sab Copy Ho Gaya!';
+    setTimeout(() => btn.textContent = '⊞ Sab Copy Karo', 2000);
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escAttr(s) {
+  return s.replace(/'/g,"\\'");
+}
+
+// Enter key
+document.addEventListener('keypress', e => { if(e.key==='Enter') generate(); });
+</script>
+</body>
+</html>
