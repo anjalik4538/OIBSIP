@@ -11,62 +11,60 @@ This repository contains all the projects completed by me during my internship a
 
 ### 🔹 1. Password Generator
 - Generates strong and secure passwords
+- Uses Python `secrets` module
 - Technologies: Python, Flask
 
 ---
 
 ### 🔹 2. Weather App
-- Shows real-time weather information
+- Displays real-time weather information
 - Uses Open-Meteo API (No API Key required)
-- Technologies: HTML, CSS, JavaScript
+- Technologies: Python (Flask)
 
 ---
 
-### 🔹 3. BMI Calculator
+### 🔹 3. Calculator
 - Performs basic arithmetic operations
-- Technologies: JavaScript
+- Technologies: Python
 
 ---
 
 ### 🔹 4. Voice Assistant
-- Voice-based assistant using Python
+- Voice-based assistant using speech recognition
 - Technologies: Python
 
- ### 5. Chat-app
+---
+
+### 🔹 5. Chat Application
+- Real-time chat between users
+- Demonstrates communication between frontend and backend
+- Technologies: Python, Flask (Socket/Server-based)
 
 ---
 
 ## 📂 Project Structure
+
 OIBSIP/
-├── Password-Generator/
-├── Weather-App/
-├── Calculator/
-├── Voice-Assistant/
-|--Chat-app
-
-
+ ├── Password-Generator/
+ ├── Weather-App/
+ ├── Calculator/
+ ├── Voice-Assistant/
+ ├── Chat-App/
 
 ---
 
 ## ⚙️ How to Run
 
-### For Python Projects:
+### Step 1: Install dependencies
 pip install -r requirements.txt
+
+### Step 2: Run the project
 python app.py
-
-
-### For Web Projects:
-- Open `index.html` in browser
-
----
-
-## 🔗 GitHub Repository
-(Add your repo link here)
 
 ---
 
 ## 📌 Conclusion
-This internship helped me improve my development skills and gain hands-on experience in real-world projects.
+This internship helped me improve my Python development skills and gain hands-on experience in building real-world applications.
 
 ---
 
